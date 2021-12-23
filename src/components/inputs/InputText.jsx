@@ -36,11 +36,40 @@ export default class InputText extends React.Component {
     ];
 
     propTypes = {
-        handleTextChange: PropTypes.func,
+        onTextInput: PropTypes.func,
     }
 
     defaultProps = {
-        handleTextChange: () => {}
+        onTextInput: () => {}
+    }
+
+    constructor(props) {
+        super(props);
+        this.textContent = {}
+        this.state = {textFields: [... this.revesvedFields]}
+    }
+
+    handleTextChange(event) {
+        Object.assign(this.textContent, 
+        {
+            [event.target.name] : event.target.value,
+        });
+
+        this.props.onTextInput(this.textContent)
+    }
+
+    addTextField() {
+        const n = this.state.textFields.length;
+        this.state.textFields.push(
+            {
+                name: 'additionalText' + n,
+                label: 'Дополнительный текст #' + n,
+                multiline: true,
+                rows: 2,
+                maxRows: 4,
+            },
+        );
+        this.setState(this.state)
     }
 
     render() {
@@ -53,7 +82,7 @@ export default class InputText extends React.Component {
             </Typography>
 
             {
-                this.revesvedFields.map((field, index) => {
+                this.state.textFields.map((field, index) => {
                     return (
                         <TextField
                         name={field.name}
@@ -61,7 +90,7 @@ export default class InputText extends React.Component {
                         rows={field.rows}
                         maxRows={field.maxRows}
                         //value={value}
-                        onChange={this.props.handleTextChange}
+                        onChange={this.handleTextChange.bind(this)}
                         sx={{width: '100%'}}
                         id={'TextField'+ index}
                         label={field.label}
@@ -73,7 +102,9 @@ export default class InputText extends React.Component {
             }
 
             <Container sx={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-            <Fab color="secondary" aria-label="add">
+            <Fab color="secondary" aria-label="add" onClick={(e) => {
+                this.addTextField.call(this)
+            }}>
             <AddIcon/>
             </Fab>
             </Container>

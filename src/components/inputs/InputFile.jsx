@@ -6,8 +6,10 @@ import {
 } from '@mui/material';
 
 import { PhotoCamera } from '@mui/icons-material';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { minWidth } from '@mui/system';
+import { getUrl } from '../../scripts/imageHelpers'
+import { imageLoadStatus } from '../../scripts/enums'
+import ImagePreview from '../stages/InputData/ImagePreview';
 
 const FileToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
     '& button': {
@@ -34,120 +36,47 @@ const UrlInput = styled(TextField)(({ theme }) => ({
     },
 }));
 
-const LightboxPaper = styled(Paper)(({ theme }) => ({
-    width: '100%',
-    height: imageHeight + lightBoxPaddingY * 2,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: theme.palette.text.primary,
-}));
-
-function testImageURL(url, timeout = 5000) {
-    return new Promise(function (resolve, reject) {
-        var timer, img = new Image();
-        img.onerror = img.onabort = function () {
-            clearTimeout(timer);
-            reject("error");
-        };
-        img.onload = function () {
-            clearTimeout(timer);
-            resolve("success");
-        };
-        timer = setTimeout(function () {
-            // reset .src to invalid URL so it stops previous
-            // loading, but doesn't trigger new load
-            img.src = "//!!!!/test.jpg";
-            reject("timeout");
-        }, timeout);
-        img.src = url;
-    });
-}
-
-const imageHeight = 540;
-const lightBoxPaddingY = 30;
-
 export default class InputFile extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {fileType: "url", loading: true}
-        this.renderCardComponent();
+        this.state = {fileType: "url", loading: true, url: ""}
     }
 
     handleFileTypeChange (event, newFileType) {
         let fileType = newFileType ? newFileType : 'url'
-        this.setState({fileType: fileType,}, () => this.renderCardComponent());
-        
+        this.setState({fileType: fileType, filename: "", url: ""});
+    
     };
     
     handleFileChange (event) {
         const file = event.target.files[0];
-        this.setState({file: file}, () => this.renderCardComponent());
+        this.setState({url: getUrl(file), filename: file.name});
     }
 
     handleUrlChange (event) {
         const url = event.target.value;
-        this.setState({url: url}, () => this.renderCardComponent());
-    }
-
-    async getImageURL() {
-        let url;
-        if (this.state.fileType === 'file' && this.state.file) {
-            url = URL.createObjectURL(this.state.file);
-        }
-        else if (this.state.url) {
-            url = this.state.url;
-        }
-
-        return url;
+        this.setState({url: getUrl(url)});
     }
 
     /**
-     * TODO: При загрузке, в карточке с видом на картинку
-     * должны запихиваться разные компоненты
+     * Мы протягиваем эту функцию до родителя через пропы \
+     * Чтобы передть текущие данные и статус \
+     * При успешной загрузке картинки
+     * @param {*} result 
      */
-    async renderCardComponent() {
-        this.setState({loading: true});
-
-        const url = await this.getImageURL();
-        testImageURL(url).then((resolve) => {
-            console.log(url)
-            let component = 
-            <Card sx={{ maxWidth: '100%', boxShadow: 'none', textAlign: 'center', borderRadius: 0 }}>
-            <CardMedia
-            component="img"
-            height={imageHeight}
-            image={url} 
-            alt="image input"
-            /></Card>
-
-            this.setState({loading: false, imageComponent:component,})
+    onImageLoaded (result) {
+        this.props.onImageInput({
+            status: result,
+            url: this.state.url,
         })
-        .catch((reject) => {
-            let component = <Box sx={{textAlign: 'center'}}>
-                <ErrorOutlineIcon color={'error'} sx={{fontSize: '6rem'}}/>
-                <div>
-                    <Typography variant={'h5'} color={'error'}>
-                        {(() => {
-                            if (reject === 'error')
-                                return 'Произошла ошибка при загрузке изображения'
-                            else if (reject === 'timeout')
-                                return 'Не удалось загрузить изображение'
-                            return reject
-                        })()}
-                    </Typography>
-                </div>
-                </Box>
-            this.setState({loading: false, imageComponent:component});
-        });
     }
 
     render() {
         return (
         <Box sx={{width:'100%'}}>
         <form>
-        <Toolbar>
+        <Toolbar sx={{maxHeight: 'auto'}}>
         <FileToggleButtonGroup
         value={this.state.fileType}
         exclusive
@@ -155,7 +84,8 @@ export default class InputFile extends React.Component {
         onChange={this.handleFileTypeChange.bind(this)}
         aria-label="file input"
         sx={{
-            
+            marginRight: 2,
+            flexShrink: 0
         }}
         >
         <ToggleButton value="file" aria-label="left aligned">
@@ -165,9 +95,6 @@ export default class InputFile extends React.Component {
             URL
         </ToggleButton>
         </FileToggleButtonGroup>
-
-        </Toolbar>
-        <Toolbar>
         
         {(() => {
             if (this.state.fileType === 'url') {
@@ -177,7 +104,7 @@ export default class InputFile extends React.Component {
                 label="Вставьте сюда URL" 
                 variant="filled" 
                 color="primary"
-                margin="dense"
+                margin="none"
                 onChange={this.handleUrlChange.bind(this)}/>
             }
 
@@ -189,8 +116,8 @@ export default class InputFile extends React.Component {
                 startIcon={<PhotoCamera />}
                 >
                 {(() => {
-                    if (this.state.file) {
-                        return this.state.file.name
+                    if (this.state.filename) {
+                        return this.state.filename
                     }
                     return "Загрузить..."
                 }
@@ -213,22 +140,10 @@ export default class InputFile extends React.Component {
         
         </Toolbar>
         </form>
-
-        <Toolbar>
-        <LightboxPaper sx={{
-            padding: 15
-        }}>
-            {( () => {
-                if (this.state.loading) {
-                    return <CircularProgress color="error" />
-                }
-                else {
-                    return this.state.imageComponent
-                }
-            }
-            )()}
-        </LightboxPaper>
-        </Toolbar>
+            <ImagePreview
+                src={this.state.url}
+                onChecked={this.onImageLoaded.bind(this)}
+            />
         </Box>
         )
     }

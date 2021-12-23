@@ -8,8 +8,9 @@ import {
 } from '@mui/material';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 
-import InputData from './stages/InputData';
-import SelectImage from './stages/SelectImage/Main';
+import InputData from './stages/InputData/index';
+import SelectImage from './stages/SelectImage/index';
+import DownloadImage from './stages/DownloadImage/index';
 import {stages} from '../scripts/enums'
 
 const drawerWidth = '36rem';
@@ -17,7 +18,7 @@ const drawerWidth = '36rem';
 export default class Generator extends React.Component {
 
     handleStateSwitch = (event, data) => {
-        this.setState({stage: data.stage})
+        this.setState(data)
     }
 
     constructor(props) {
@@ -34,9 +35,18 @@ export default class Generator extends React.Component {
                         case stages.INPUT_DATA:
                             return <InputData handleStateSwitch={this.handleStateSwitch.bind(this)} />
                         case stages.SELECT_IMAGE:
-                            return <SelectImage imageWidth={1200} imageHeight={1200} handleStateSwitch={this.handleStateSwitch.bind(this)}/>
+                            return <SelectImage
+                            originalImage={this.state.originalImage}
+                            textContent={this.state.textContent}
+                            handleStateSwitch={this.handleStateSwitch.bind(this)}/>
+                        case stages.DOWNLOAD_IMAGE:
+                            return <DownloadImage
+                            url={this.state.image}
+                            original={{textContent: this.state.textContent, image: this.state.originalImage}}
+                            handleStateSwitch={this.handleStateSwitch.bind(this)}
+                            />
                         default:
-                            return "error!"
+                            return "error! Wrong stage given"
                     }
                 })()
             }
