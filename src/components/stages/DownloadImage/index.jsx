@@ -9,8 +9,8 @@ import {
     styled,
     Toolbar
 } from '@mui/material';
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-
+import DownloadIcon from '@mui/icons-material/Download';
+import CloseIcon from '@mui/icons-material/Close';
 import ImagePreview from '../InputData/ImagePreview';
 
 import {stages, imageLoadStatus} from '../../../scripts/enums'
@@ -60,7 +60,7 @@ export default class DownloadImage extends React.Component {
 
                     href={this.props.url}
                     download="postgen.jpg"
-                    startIcon={<PlayCircleOutlineIcon />}
+                    startIcon={<DownloadIcon />}
                     >
                     Скачать (jpg)
                     </Button>
@@ -72,7 +72,7 @@ export default class DownloadImage extends React.Component {
                     margin="dense"
                     size="large"
                     sx={{textAlign: 'center', marginLeft: 2}}
-                    startIcon={<PlayCircleOutlineIcon />}
+                    startIcon={<CloseIcon />}
                     onClick={(e) =>
                     this.props.handleStateSwitch(e,
                         {stage: stages.SELECT_IMAGE,

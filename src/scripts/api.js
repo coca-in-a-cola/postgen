@@ -6,6 +6,9 @@ const getSingleText = (textContent) => {
     return Object.values(textContent).join("\n");
 }
 
+let lastImages = [];
+let lastIndex = 0;
+
  /**
   * @param data Данные для запроса
   * @param data.image URL изображения, которое загружаем
@@ -25,18 +28,17 @@ export const getImages = async (data) => {
 
     const response = await fetch(url, requestOptions);
     const result = await response.json();
-    console.log(result);
-    //return result['images']
+    lastImages = result['images'];
+    return lastImages
 }
 
  /**
-  * @param data Данные для запроса
-  * @param data.image URL изображения, которое загружаем
-  * @param data.textContent Текст в виде объекта
+  * Не забудьте сначала зпустить getImages(...)
   * @return {Promise<url>} Промис, который разрешится как base64 строка картинки (data-url)
   */
 export const getNextImage = async (data) => {
-    const response = await urlToBase64(getUrl(data.image));
-    const result = base64ToUrl(response);
+    const currentIndex = lastIndex;
+    lastIndex++;
+    const result = await base64ToUrl(lastImages[currentIndex % lastImages.length]);
     return result;
 }

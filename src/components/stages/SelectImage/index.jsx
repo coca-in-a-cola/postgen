@@ -12,6 +12,7 @@ import {
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import ImageCard from './ImageCard'
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import LoaderScreen from '../../LoaderScreen'
 import { stages } from '../../../scripts/enums';
 import { getImages, getNextImage } from '../../../scripts/api';
 import { base64ToUrl, base64ToUrlSync } from '../../../scripts/imageHelpers';
@@ -30,7 +31,7 @@ export default class SelectImage extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {loading: true}
+        this.state = {placeholderLoaded: false, imagesLoaded: false}
     }
 
     async componentDidMount() {
@@ -53,7 +54,7 @@ export default class SelectImage extends React.Component {
                     let scale = imagePreviewWidth / image.width;
                     return image.height * scale;
                 })(),
-                loading: false
+                placeholderLoaded: true
             }
 
             if (this.state)
@@ -62,10 +63,12 @@ export default class SelectImage extends React.Component {
                 this.state = newState
         }).bind(this);
 
-        /*getImages({
-            image: this.props.image,
+        getImages({
+            image: this.props.originalImage,
             textContent: this.props.textContent
-        });*/
+        }).then((result) => {
+            this.setState({imagesLoaded: true, imagesCount: result.length})
+        })
     }
 
     selectItem(e, src) {
@@ -76,10 +79,14 @@ export default class SelectImage extends React.Component {
     }
 
     render() {
-        const getUrlPromise = (() => getNextImage({
-            image: this.props.originalImage,
-            textContent: this.props.textContent
-        })).bind(this);
+
+        if (!this.state.placeholderLoaded || !this.state.imagesLoaded) {
+            return <LoaderScreen/>
+        }
+
+        else {
+
+        const getUrlPromise = (() => getNextImage()).bind(this);
 
         return (
         <Container>
@@ -97,7 +104,7 @@ export default class SelectImage extends React.Component {
             <Grid container spacing={this.state.spacing}>
             {(() => {
                 const items = [];
-                for(let i = 0; i < this.state.itemsPerLine; ++i) {
+                for(let i = 0; i < this.state.imagesCount; ++i) {
                     // TODO: переписать так, чтобы в ImageCard находилось минимум логики
                     // Также, нужно убрать лаги с загрузкой
                     // Загрузку можно объявлять как проп
@@ -148,6 +155,7 @@ export default class SelectImage extends React.Component {
             </Box>
         </Container>
         );
+    }
     }
 }
 
