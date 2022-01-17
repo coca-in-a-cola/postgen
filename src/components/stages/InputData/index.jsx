@@ -1,10 +1,8 @@
 import React from 'react';
 import {
-    Box, Button, ButtonGroup, Drawer, CssBaseline,
-    AppBar, Toolbar, List, Typography,
-    Divider, ListItem, ListItemText,
-    ToggleButton, TextField,
-    styled,
+    Box, Button,
+    CssBaseline, Typography,
+    Fab,
     Container
 } from '@mui/material';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
@@ -59,8 +57,11 @@ export default class InputData extends React.Component {
             <Container sx={{paddingBottom: 2}}>
                 <CssBaseline />
 
-                <Box sx = {{marginTop: 6, paddingBottom: 1, position: 'relative'}}>
-                <Typography variant={'h2'} color={'primary'}>
+                <Box sx = {{marginTop: 2, paddingBottom: 1, position: 'relative'}}>
+                <Typography variant={'h2'} color={'primary'}
+                sx={{
+                  fontSize: {xs: '2.5rem', lg: '3.75rem'},
+                }}>
                     Введите данные
                 </Typography>
                 </Box>
@@ -74,7 +75,7 @@ export default class InputData extends React.Component {
                 </Box>
 
                 <Box sx ={{marginTop: 2, width: '100%', textAlign: 'center'}}>
-                    <Button
+                    { /* <Button
                     disabled={!launchButtonEnabled}
                     variant="contained"
                     component="label"
@@ -92,7 +93,25 @@ export default class InputData extends React.Component {
                     }}
                     >
                     Запустить генератор
-                    </Button>
+                  </Button> */}
+
+                    <Fab
+                    disabled={!launchButtonEnabled}
+                    component="label"
+                    onClick={(e) => {
+                      this.props.handleStateSwitch(e,
+                        {stage: stages.SELECT_IMAGE,
+                        image: this.state.image,
+                        textContent: this.state.textContent}
+                      )
+                    }}
+                    variant="extended"
+                    color="primary"
+                    aria-label="start"
+                    >
+                      <PlayCircleOutlineIcon sx={{ mr: 1 }} />
+                      Запустить генератор
+                    </Fab>
                     {/*<Typography variant='h6' color='textSecondary' sx ={{display: 'block'}}>
                         Или просто нажмите [space]
                     </Typography>*/}

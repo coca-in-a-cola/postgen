@@ -23,9 +23,21 @@ export default class Generator extends React.Component {
         return statusCodes.SUCCESS;
     }
 
+    async shutdown (event, data) {
+        // Жду, когда Петя пофиксит это на беке
+        await this.state.api.shutdown();
+        await this.setState({api: undefined, listModel: undefined})
+        
+        return(statusCodes.SUCCESS)
+    }
+
     constructor(props) {
         super(props);
         this.state = {stage: stages.INPUT_DATA }
+    }
+
+    componentDidMount() {
+        document.title = "ImageGen";
     }
 
     render() {
@@ -37,18 +49,25 @@ export default class Generator extends React.Component {
                 : (() => {
                     switch (this.state.stage) {
                         case stages.INPUT_DATA:
-                            return <InputData handleStateSwitch={(event, data) => {
+                            return <InputData handleStateSwitch={((event, data) => {
                                 this.initialize.call(this, event, data).then(result => {
                                     this.handleStateSwitch.call(this, event, data)
                                 }).catch(error => {
                                     console.log('...')
                                 })
-                                
-                            }} />
+                            }).bind(this)} />
                         case stages.SELECT_IMAGE:
                             return <SelectImage
                             imageListModel={this.state.listModel}
-                            handleStateSwitch={this.handleStateSwitch.bind(this)}
+                            handleStateSwitch={((event, data) => {
+                                if (data?.stage === stages.INPUT_DATA)
+                                    this.shutdown.call(this, event, data).then(() => {
+                                        this.handleStateSwitch.call(this, event, data)
+                                    })
+                                else {
+                                    this.handleStateSwitch.call(this, event, data)
+                                }
+                            }).bind(this)}
                             pages={this.state.pages}/>
                         case stages.DOWNLOAD_IMAGE:
                             return <DownloadImage

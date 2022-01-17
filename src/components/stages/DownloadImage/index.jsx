@@ -6,8 +6,8 @@ import {
     Grid, List, Typography,
     Divider, ListItem, ListItemText,
     ToggleButton, TextField,
-    styled,
-    Toolbar,
+    Card,
+    CardMedia,
     Container
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -35,12 +35,25 @@ export default class DownloadImage extends React.Component {
             <Container sx={{paddingBottom: 2}}>
                 <CssBaseline />
                 <Box sx={{width: '100%', position:'relative'}}>
-                <Typography variant={'h2'} sx={{marginTop: 2, marginBottom: 2}} color={'primary'}>
+                <Typography variant={'h2'} color={'primary'}
+                sx={{
+                    marginTop: 2,
+                    marginBottom: 2,
+                    fontSize: {xs: '2.5rem', lg: '3.75rem'},
+                  }}
+                >
                     Скачайте картинку
                 </Typography>
-
-                <ImagePreviewPrimary src={this.props.url} height={600} />
-                <Box sx={{ marginTop: 2, display: 'flex', justifyContent: 'flex-start' }}>
+                
+                <Box sx={{display: {xs: 'none', lg: 'block'}}}>
+                    <ImagePreviewPrimary src={this.props.url} height={600} />
+                </Box>
+                <Box sx={{display: {xs: 'block', lg: 'none'}, }}>
+                    <Card>
+                        <CardMedia component='img' sx={{width: '100%', height: 'auto'}} src={this.props.url} alt="result preview"/>
+                    </Card>
+                </Box>
+                <Box sx={{ marginTop: 2, display: {xs: 'block', lg: 'flex'}, justifyContent: 'flex-start' }}>
                     <Button
                     variant="contained"
                     component={'a'}
@@ -63,7 +76,11 @@ export default class DownloadImage extends React.Component {
                     color="error"
                     margin="dense"
                     size="large"
-                    sx={{textAlign: 'center', marginLeft: 2}}
+                    sx={{
+                    textAlign: 'center',
+                    marginLeft: {xs: 0, lg: 2},
+                    marginTop: {xs: 2, lg: 0}
+                    }}
                     startIcon={<CloseIcon />}
                     onClick={(e) =>
                     this.props.handleStateSwitch(e,

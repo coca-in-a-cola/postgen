@@ -44,7 +44,7 @@ export default class InputText extends React.Component {
                 <TextField
                 name={"text"}
                 multiline
-                rows={2}
+                rows={1}
                 maxRows={4}
                 onChange={this.handleTextChange.bind(this)}
                 sx={{width: '100%'}}

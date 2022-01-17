@@ -95,8 +95,12 @@ export default class SelectImage extends React.Component {
         
         return (
         <Container sx={{paddingBottom: 2}}>
-            <Box sx = {{marginTop: 8, position: 'relative'}}>
-            <Typography variant={'h2'} color={'primary'}>
+            <Box sx = {{marginTop: 2, position: 'relative'}}>
+            <Typography variant={'h2'} color={'primary'}
+            sx={{
+                fontSize: {xs: '2.5rem', lg: '3.75rem'},
+            }}
+            >
                 Выберите вариант оформления
             </Typography>
             </Box>
@@ -115,7 +119,9 @@ export default class SelectImage extends React.Component {
 
             <Box sx={{
                 width: '100%', position: 'relative', display: 'flex', 
-                marginTop: 2, alignItems: 'center', justifyContent: 'center',
+                marginTop: 2,
+                alignItems: 'center',
+                justifyContent:  {xs: 'flex-start', lg: 'center'},
                 }}>
                 <Button
                     variant="contained"
@@ -123,7 +129,8 @@ export default class SelectImage extends React.Component {
                     color="error"
                     margin="dense"
                     size="large"
-                    sx={{position: 'absolute', left: 0}}
+                    
+                    sx={{position: {xs: 'block', lg: 'absolute'}, left: 0, marginRight: {xs: 1, lg: 0}, }}
                     startIcon={<ArrowBackIosIcon />}
                     onClick={(e) => this.props.handleStateSwitch(e, {stage: stages.INPUT_DATA})}
                     >

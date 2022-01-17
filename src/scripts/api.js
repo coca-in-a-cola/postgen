@@ -127,7 +127,7 @@ export default class Api {
             method: 'GET',
         };
 
-        const url = `${apiServer}/api/prolong-token?token=${this._token}`;
+        const url = `${apiServer}/api/remove-token?token=${this._token}`;
 
         return fetch(url);
     }

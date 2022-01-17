@@ -11,14 +11,13 @@ import {
     styled, CardMedia, Skeleton, CircularProgress, Toolbar, Typography, Paper,
 } from '@mui/material';
 
-const lightBoxPaddingY = 30;
-
 const LightboxPaper = styled(Paper)(({ theme }) => ({
     width: '100%',
     // height: imageHeight + lightBoxPaddingY * 2,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 1,
     backgroundColor: theme.palette.text.primary,
 }));
 
@@ -40,7 +39,7 @@ export default class ImagePreviewPrimary extends React.Component {
     }
 
     static defaultProps = {
-        height: 360
+        height: 300
     }
 
     constructor(props) {
@@ -70,9 +69,11 @@ export default class ImagePreviewPrimary extends React.Component {
             <Card sx={{ maxWidth: '100%', boxShadow: 'none', textAlign: 'center', borderRadius: 0 }}>
             <CardMedia
             component="img"
-            height={this.props.height}
             image={url} 
             alt="image input"
+            sx={{
+                height: this.props.height - 30,
+            }}
             /></Card>
 
             this.setState({loading: false, imageComponent:component,})
@@ -93,8 +94,8 @@ export default class ImagePreviewPrimary extends React.Component {
     render() {
         return(
             <LightboxPaper sx={{
-                height: this.props.height + lightBoxPaddingY * 2,
-                padding: 15
+                height: this.props.height,
+                padding: {xs: 1, md: 2, lg:10, xl: 15}
             }}>
                 {( () => {
                     if (this.state.loading) {

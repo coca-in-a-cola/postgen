@@ -78,7 +78,7 @@ export default class InputFile extends React.Component {
         <Typography variant={'h6'} color="secondary">
             Исходная картинка
         </Typography>
-        <Box sx={{display: 'flex', alignItems: 'center', minHeight: 64}}>
+        <Box sx={{ display: {xs: 'block', lg: 'flex'}, alignItems: 'center', minHeight: {xs: 0, lg: 64}}}>
         <FileToggleButtonGroup
         value={this.state.fileType}
         exclusive
@@ -87,7 +87,7 @@ export default class InputFile extends React.Component {
         aria-label="file input"
         sx={{
             marginRight: 2,
-            flexShrink: 0
+            flexShrink: 0,
         }}
         >
         <ToggleButton value="file" aria-label="left aligned">
@@ -107,7 +107,12 @@ export default class InputFile extends React.Component {
                 variant="filled" 
                 color="primary"
                 margin="none"
-                onChange={this.handleUrlChange.bind(this)}/>
+                onChange={this.handleUrlChange.bind(this)}
+                sx={{
+                    marginTop: {xs: 1, lg: 'inherit'},
+                    marginBottom: {xs: 1, lg: 'inherit'},
+                }}
+                />
             }
 
             return <Button
@@ -116,6 +121,10 @@ export default class InputFile extends React.Component {
                 color="primary"
                 margin="dense"
                 startIcon={<PhotoCamera />}
+                sx={{
+                    marginTop: {xs: 1, lg: 'inherit'},
+                    marginBottom: {xs: 1, lg: 'inherit'},
+                }}
                 >
                 {(() => {
                     if (this.state.filename) {
