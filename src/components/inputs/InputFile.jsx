@@ -9,7 +9,7 @@ import { PhotoCamera } from '@mui/icons-material';
 import { minWidth } from '@mui/system';
 import { getUrl } from '../../scripts/imageHelpers'
 import { imageLoadStatus } from '../../scripts/enums'
-import ImagePreview from '../stages/InputData/ImagePreview';
+import ImagePreviewPrimary from '../imagePreviews/Primary';
 
 const FileToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
     '& button': {
@@ -40,11 +40,11 @@ export default class InputFile extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {fileType: "url", loading: true, url: ""}
+        this.state = {fileType: "file", loading: true, url: ""}
     }
 
     handleFileTypeChange (event, newFileType) {
-        let fileType = newFileType ? newFileType : 'url'
+        let fileType = newFileType ? newFileType : 'file'
         this.setState({fileType: fileType, filename: "", url: ""});
     
     };
@@ -75,8 +75,10 @@ export default class InputFile extends React.Component {
     render() {
         return (
         <Box sx={{width:'100%'}}>
-        <form>
-        <Toolbar sx={{maxHeight: 'auto'}}>
+        <Typography variant={'h6'} color="secondary">
+            Исходная картинка
+        </Typography>
+        <Box sx={{display: 'flex', alignItems: 'center', minHeight: 64}}>
         <FileToggleButtonGroup
         value={this.state.fileType}
         exclusive
@@ -135,12 +137,9 @@ export default class InputFile extends React.Component {
             </Button>
             }
         )()}
+        </Box>
 
-
-        
-        </Toolbar>
-        </form>
-            <ImagePreview
+            <ImagePreviewPrimary
                 src={this.state.url}
                 onChecked={this.onImageLoaded.bind(this)}
             />

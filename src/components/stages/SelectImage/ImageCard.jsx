@@ -3,15 +3,17 @@ import PropTypes from 'prop-types'
 
 import {
     Card, CardActionArea, Paper, CardMedia,
-    CardActions, Button, CardContent, Typography,
-    Skeleton, Box, 
+    CardActions, Fab,
+    Skeleton, Box, IconButton,
     styled
 } from '@mui/material';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-import ImagePrewiew from '../InputData/ImagePreview'
 import { PinDrop } from '@mui/icons-material';
 
 import { stages } from '../../../scripts/enums'
+
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import DownloadIcon from '@mui/icons-material/Download';
 
 const Item = styled(Paper)(({ theme }) => ({
     ...theme.typography.body2,
@@ -20,21 +22,27 @@ const Item = styled(Paper)(({ theme }) => ({
 export default class ImageCard extends React.Component {
     
     static propTypes = {
-        /**
-         * обработанная картинка, промис, который выдаст нам url
-         */
-        urlPromise: PropTypes.shape({
-            then: PropTypes.func.isRequired,
-            catch: PropTypes.func.isRequired
-        }),
+        loading: PropTypes.bool,
 
         /**
-         * Высота нашей картинки в карточке
-         * От неё зависит отображаемая ширина
+         * Если loading = false, предоставляйте src и onClick
          */
-        height: PropTypes.oneOfType(PropTypes.string, PropTypes.number),
+        src: PropTypes.string,
 
-        handleStateSwitch: PropTypes.func
+        /**
+         * Событе при клике на карточку
+         */
+        onClick: PropTypes.func,
+
+        /**
+         * Необязательно
+         * @default 256
+         */
+        placeholderHeight: PropTypes.number
+    }
+
+    static defaultProps = {
+        placeholderHeight: 256
     }
 
     constructor(props) {
@@ -43,12 +51,15 @@ export default class ImageCard extends React.Component {
     }
 
     componentDidMount() {
-        this.props.urlPromise.then(result => {
-            this.setState({loading: false, src: result})
-        })
-        .catch(error => {
-            this.setState({loading: false, error: error})
-        });
+        if (this.props.src) {
+            this.setState({loading: false, src: this.props.src})
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        if (prevProps.src != this.props.src) {
+            this.setState({loading: false, src: this.props.src})
+        }
     }
 
     handleImageLoaded() {
@@ -63,79 +74,59 @@ export default class ImageCard extends React.Component {
         return (
             <Card>
                 <CardActionArea
-                onClick = {(e) => {
-                    this.props.handleStateSwitch(e,
-                        {
-                        stage: stages.DOWNLOAD_IMAGE,
-                        image: this.state.src
-                        }
-                    )}
-                }
+                onClick = {this.props.loading ? () => {} : (e) => this.props.onClick(e)}
+                sx = {{ position: 'relative' }}
                 >
-
-                    {(() => {
-                        if (this.state.loading) {
-                            return <Skeleton
-                            sx={{ height: this.props.height }}
-                            animation="wave"
-                            variant="rectangular"
-                            />
-                        }
-
-                        else if (this.state.imageLoading) {
-                            return (
-                            <Box sx={{position: 'relative', width: '100%', height: this.props.height}}>
-                            <Skeleton
-                            sx={{
-                                zIndex: 100,
-                                height: this.props.height,
-                                position: 'absolute', top: 0, left:0, right: 0,
-                            }}
-                            animation="wave"
-                            variant="rectangular"
-                            />
-                            <Box sx={{
-                            position: 'absolute',
-                            top: 0, left:0, right: 0,
-                            height: this.props.height,
-                            background: '#fff',
-                            }}
-                            />
-                            <CardMedia
-                            component={'img'}
-                            height={this.props.height}
-                            src={this.state.src}
-                            onLoad={this.handleImageLoaded.bind(this)}
-                            onError={this.handleImageErrored.bind(this)}
-                            alt={'image'}
-                            />
-                            </Box>
-                            );
-                        }
-
-                        else {
-                            return <CardMedia
-                            component={'img'}
-                            height={this.props.height}
-                            src={this.state.src}
-                            alt={'image'}
-                            />
-                        }
-                    })()}
-
-                    <CardContent>
-                    <Typography gutterBottom variant="h5" component="div">
-                        Нейросеть № 12345
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        Сид 102103890
-                    </Typography>
-                    </CardContent>
+                    
+                    {
+                        this.props.loading
+                        ? <Skeleton
+                        height={this.props.placeholderHeight}
+                        width={'100%'}
+                        variant="rectangular"
+                        sx = {{ }}
+                        />
+                        : <CardMedia
+                        component={'img'}
+                        src={this.state.src}
+                        alt={'generation result'}
+                        sx = {{ position: 'relative' }}
+                        />
+                    }
                 </CardActionArea>
+
                 <CardActions>
-                    <Button size="small" color="secondary">
-                    В избранное
-                    </Button>
+                    <Box sx={{ display: 'flex', alignItems: 'center', pl: 1, pb: 1 }}>
+                    {
+                        this.props.loading
+                        ? <>
+                        <Skeleton variant="text" width={80}/>
+                        <Skeleton variant="circular" width={40} height={40} sx={{ ml: 1 }} />
+                        </>
+                        : <>
+                            <Fab 
+                                variant="extended"
+                                color="primary"
+                                size="small" 
+                                onClick = {(e) => this.props.onClick(e)}
+                            >
+                                <VisibilityIcon sx={{ mr: 1 }} />
+                                Просмотр
+                            </Fab>
+
+                            <IconButton
+                                component={'a'}
+                                href={this.props.src}
+                                download="postgen.jpg"
+                                crossOrigin = "anonymous"
+                                target = "_blank"
+                                sx={{ ml: 1 }}
+                            >
+                                <DownloadIcon/>
+                            </IconButton>
+                        </>
+                    }
+                    </Box>
                 </CardActions>
             </Card>
         )

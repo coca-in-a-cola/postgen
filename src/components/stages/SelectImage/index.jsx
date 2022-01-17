@@ -10,120 +10,108 @@ import {
 } from '@mui/material';
 
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import ImageCard from './ImageCard'
+import ImageCard from './ImageCard.jsx.old'
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import LoaderScreen from '../../LoaderScreen'
 import { stages } from '../../../scripts/enums';
-import { getImages, getNextImage } from '../../../scripts/api';
+import Api, { getImages, getNextImage } from '../../../scripts/api';
 import { base64ToUrl, base64ToUrlSync } from '../../../scripts/imageHelpers';
+import ImageListModel from '../../../scripts/selectImage/imageListModel';
+import Page from './Page'
 
-const Item = styled(Paper)(({ theme }) => ({
-    ...theme.typography.body2,
-}));
+class pageData {
+    constructor(props) {
+        this.props = {}
+        Object.assign(this.props, props)
+    }
+}
 
 export default class SelectImage extends React.Component {
 
     static propTypes = {
-        originalImage: PropTypes.string,
-        textContent: PropTypes.object,
-        handleStateSwitch: PropTypes.func
+        loading: PropTypes.bool,
+
+        handleStateSwitch: PropTypes.func,
+        
+        /**
+         * imageListModel
+         */
+        imageListModel: PropTypes.object,
+
+        /**
+        * Передавайте, только если возвращаетесь к "готовой" странице
+        */
+        pages: PropTypes.arrayOf(pageData),
+
+        /**
+        * @default 12
+        */
+        imagesPerPage: PropTypes.number,
+    }
+
+    static defaultProps = {
+        imagesPerPage: 12,
     }
 
     constructor(props) {
         super(props);
-        this.state = {placeholderLoaded: false, imagesLoaded: false}
+        this.state = {loading: true,
+            pages: props.pages 
+            ? [... props.pages] 
+            : [this.getNewPage.call(this, props)]}
+
+        // TODO: использовать imageListModel
+    }
+
+    getNewPage(props) {
+        const imagesPerPage = props.imagesPerPage || SelectImage.defaultProps.imagesPerPage
+        const offset = imagesPerPage * (this.state?.pages?.length || 0)
+
+        props.imageListModel.requestTo(offset + imagesPerPage);
+
+        return new pageData({
+            listModel: props.imageListModel,
+            itemsCount: imagesPerPage,
+            offset: offset,
+            onItemSelect: this.selectItem.bind(this),
+        })
     }
 
     async componentDidMount() {
-        const itemsPerLine = 3;
-        const spacing = 2;
-        const containerInnerWidth = 1200 - 24*2;
-
-        // Жесткие хаки для высчитывания размеров картинки (хардкод)
-        const image = new Image();
-        image.src = this.props.originalImage
-
-
-        image.onload = (() => {
-            const newState = {
-                itemsPerLine: itemsPerLine,
-                spacing: spacing,
-                containerInnerWidth: containerInnerWidth,
-                itemHeight: (() => {
-                    let imagePreviewWidth = (containerInnerWidth - (spacing * (itemsPerLine - 1) * 8)) / 3;
-                    let scale = imagePreviewWidth / image.width;
-                    return image.height * scale;
-                })(),
-                placeholderLoaded: true
-            }
-
-            if (this.state)
-                this.setState(newState);
-            else
-                this.state = newState
-        }).bind(this);
-
-        getImages({
-            image: this.props.originalImage,
-            textContent: this.props.textContent
-        }).then((result) => {
-            this.setState({imagesLoaded: true, imagesCount: result.length})
-        })
+        this.props.imageListModel.onImageLoaded = () => {
+            this.forceUpdate()
+        }
     }
 
     selectItem(e, src) {
         this.props.handleStateSwitch(e,
             {stage: stages.DOWNLOAD_IMAGE,
-            image: src}
+            image: src,
+            pages: this.state.pages}
         )
     }
 
     render() {
-
-        if (!this.state.placeholderLoaded || !this.state.imagesLoaded) {
-            return <LoaderScreen/>
-        }
-
-        else {
-
-        const getUrlPromise = (() => getNextImage()).bind(this);
-
+        
         return (
-        <Container>
-            <Box sx = {{marginTop: 8, paddingBottom: 1, position: 'relative'}}>
-            <Typography color={'textSecondary'} variant={'h1'} sx = {{
-                opacity: .5, fontSize: 150, fontWeight: 900, position: 'absolute', zIndex: -1, left: -140, top: -70
-                }}>
-                02
-            </Typography>
+        <Container sx={{paddingBottom: 2}}>
+            <Box sx = {{marginTop: 8, position: 'relative'}}>
             <Typography variant={'h2'} color={'primary'}>
                 Выберите вариант оформления
             </Typography>
             </Box>
 
-            <Grid container spacing={this.state.spacing}>
-            {(() => {
-                const items = [];
-                for(let i = 0; i < this.state.imagesCount; ++i) {
-                    // TODO: переписать так, чтобы в ImageCard находилось минимум логики
-                    // Также, нужно убрать лаги с загрузкой
-                    // Загрузку можно объявлять как проп
-                    items.push(
-                    <Grid item xs={12 / this.state.itemsPerLine}>
-                        <Item>
-                            <ImageCard height={this.state.itemHeight}
-                            urlPromise={getUrlPromise()}
-                            // Обрабатывается внутри ImageCard
-                            // Да, не очень краивое решение, но пусть пока будет так
-                            handleStateSwitch={this.props.handleStateSwitch}/>
-                        </Item>
-                    </Grid>
-                    )
-                }
-                return items;
-            })()}
-            </Grid>
-            
+            {
+                //** Страницы рендерятся тут */
+                // this.state.pages.map(pd => {<Page {...pd.props} />})
+                (() => {
+                    const result = [];
+                    this.state.pages.forEach(page => {
+                        result.push(<Page {... page.props} />);
+                    })
+                    return result;
+                })()
+            }
 
             <Box sx={{
                 width: '100%', position: 'relative', display: 'flex', 
@@ -142,26 +130,22 @@ export default class SelectImage extends React.Component {
                     Назад
                 </Button>
 
-                <Pagination
-                count={10}
-                variant="outlined"
-                color="secondary"
-                size="large"
-                shape="rounded" />
-            </Box>
-
-            <Box sx ={{marginLeft: 2}}>
-                
+                <Button
+                    variant="contained"
+                    component="label"
+                    color="primary"
+                    margin="dense"
+                    size="large"
+                    //startIcon={<ArrowBackIosIcon />}
+                    onClick={(e) => {
+                        this.state.pages.push(this.getNewPage.call(this, this.props))
+                        this.forceUpdate();
+                    }}
+                    >
+                    Загрузить ещё
+                </Button>
             </Box>
         </Container>
         );
     }
-    }
 }
-
-// Specifies the default values for props:
-SelectImage.defaultProps = {
-    imageWidth: 400,
-    imageHeight: 600,
-};
-  

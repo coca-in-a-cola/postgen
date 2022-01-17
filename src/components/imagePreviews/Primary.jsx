@@ -1,10 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { imageLoadStatus } from '../../../scripts/enums'
-import { testImageURL } from '../../../scripts/imageHelpers'
-import CropOriginalIcon from '@mui/icons-material/CropOriginal';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { imageLoadStatus } from '../../scripts/enums'
+import { testImageURL } from '../../scripts/imageHelpers'
+import Error from './Error'
 
 import {
     Box, Button, Card, TextField,
@@ -12,44 +11,11 @@ import {
     styled, CardMedia, Skeleton, CircularProgress, Toolbar, Typography, Paper,
 } from '@mui/material';
 
-const imageHeight = 540;
 const lightBoxPaddingY = 30;
-
-function getErrorComponent(error) {
-    switch(error) {
-        case(imageLoadStatus.ERROR):
-            return <Box sx={{textAlign: 'center'}}>
-            <ErrorOutlineIcon color={'error'} sx={{fontSize: '6rem'}}/>
-            <Box>
-                <Typography variant={'h5'} color={'error'}>
-                     Произошла ошибка при загрузке изображения
-                </Typography>
-            </Box>
-            </Box>
-        case(imageLoadStatus.TIMEOUT):
-            return <Box sx={{textAlign: 'center'}}>
-                <ErrorOutlineIcon color={'error'} sx={{fontSize: '6rem'}}/>
-                <Box>
-                    <Typography variant={'h5'} color={'error'}>
-                        Не удалось загрузить изображение
-                    </Typography>
-                </Box>
-                </Box>
-        case(imageLoadStatus.EMPTY):
-            return <Box sx={{textAlign: 'center'}}>
-            <CropOriginalIcon color={'secondary'} sx={{fontSize: '6rem'}}/>
-            <Box>
-                <Typography variant={'h5'} color={'secondary'}>
-                    Пожалуйста, загрузите изображение
-                </Typography>
-            </Box>
-            </Box>
-    }
-}
 
 const LightboxPaper = styled(Paper)(({ theme }) => ({
     width: '100%',
-    height: imageHeight + lightBoxPaddingY * 2,
+    // height: imageHeight + lightBoxPaddingY * 2,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -57,15 +23,24 @@ const LightboxPaper = styled(Paper)(({ theme }) => ({
 }));
 
 
-export default class ImagePreview extends React.Component {
+export default class ImagePreviewPrimary extends React.Component {
     static propTypes = {
         src: PropTypes.any,
+
+        /**
+         * Высота в пикселях
+         */
+        height: PropTypes.number,
 
         /**
          * Действие по окончанию проверки картинки \
          * Вызывается с единственным парметром (status)
          */
         onChecked: PropTypes.func
+    }
+
+    static defaultProps = {
+        height: 360
     }
 
     constructor(props) {
@@ -80,7 +55,6 @@ export default class ImagePreview extends React.Component {
             this.setState({loading: true})
             this.renderCardComponent.call(this, nextProps.src)
             console.log(nextProps.src)
-    
         }
     }
 
@@ -96,7 +70,7 @@ export default class ImagePreview extends React.Component {
             <Card sx={{ maxWidth: '100%', boxShadow: 'none', textAlign: 'center', borderRadius: 0 }}>
             <CardMedia
             component="img"
-            height={imageHeight}
+            height={this.props.height}
             image={url} 
             alt="image input"
             /></Card>
@@ -107,7 +81,7 @@ export default class ImagePreview extends React.Component {
             this.props.onChecked?.(resolve)
         })
         .catch((reject) => {
-            let component = getErrorComponent(reject)
+            let component = <Error status={reject} />
             
             this.setState({loading: false, imageComponent:component});
 
@@ -118,8 +92,8 @@ export default class ImagePreview extends React.Component {
 
     render() {
         return(
-            <Toolbar>
             <LightboxPaper sx={{
+                height: this.props.height + lightBoxPaddingY * 2,
                 padding: 15
             }}>
                 {( () => {
@@ -132,7 +106,6 @@ export default class ImagePreview extends React.Component {
                 }
                 )()}
             </LightboxPaper>
-            </Toolbar>    
         )
     }
     

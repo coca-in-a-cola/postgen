@@ -4,7 +4,8 @@ import {
     AppBar, Toolbar, List, Typography,
     Divider, ListItem, ListItemText,
     ToggleButton, TextField,
-    styled
+    styled,
+    Container
 } from '@mui/material';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 
@@ -13,8 +14,14 @@ import InputText from '../../inputs/InputText';
 
 import {stages, imageLoadStatus} from '../../../scripts/enums'
 
-const drawerWidth = '36rem';
-
+const isValidTextContent = (content) => {
+  try {
+    return Object.values(content).join("") != ""
+  }
+  catch {
+    return false;
+  }
+}
 
 export default class InputData extends React.Component {
 
@@ -44,25 +51,28 @@ export default class InputData extends React.Component {
     }
 
     render() {
-        const launchButtonEnabled = this.state?.image && this.state?.textContent;
+        const launchButtonEnabled = this.state?.image
+        && this.state?.textContent
+        && isValidTextContent(this.state?.textContent);
 
         return (
-            <Box sx={{ display: 'flex' }}>
+            <Container sx={{paddingBottom: 2}}>
                 <CssBaseline />
-                <Box sx={{width: '100%', position:'relative'}}>
 
-                <Box sx = {{marginTop: 6, paddingBottom: 1, marginLeft: 3, position: 'relative'}}>
-                <Typography color={'textSecondary'} variant={'h1'} sx = {{
-                    opacity: .5, fontSize: 150, fontWeight: 900, position: 'absolute', zIndex: -1, right: 20, top: -30
-                    }}>
-                    01
-                </Typography>
+                <Box sx = {{marginTop: 6, paddingBottom: 1, position: 'relative'}}>
                 <Typography variant={'h2'} color={'primary'}>
                     Введите данные
                 </Typography>
                 </Box>
 
-                <InputFile onImageInput={this.handleImageLoaded.bind(this)} />
+                <Box sx = {{marginTop: 0}}>
+                  <InputFile onImageInput={this.handleImageLoaded.bind(this)} />
+                </Box>
+
+                <Box sx = {{marginTop: 2}}>
+                  <InputText onTextInput={this.handleTextChanged.bind(this)} />
+                </Box>
+
                 <Box sx ={{marginTop: 2, width: '100%', textAlign: 'center'}}>
                     <Button
                     disabled={!launchButtonEnabled}
@@ -73,12 +83,13 @@ export default class InputData extends React.Component {
                     size="large"
                     sx={{textAlign: 'center', margin: '0 auto'}}
                     startIcon={<PlayCircleOutlineIcon />}
-                    onClick={(e) =>
+                    onClick={(e) => {
                       this.props.handleStateSwitch(e,
                         {stage: stages.SELECT_IMAGE,
-                        originalImage: this.state.image,
+                        image: this.state.image,
                         textContent: this.state.textContent}
-                      )}
+                      )
+                    }}
                     >
                     Запустить генератор
                     </Button>
@@ -86,27 +97,7 @@ export default class InputData extends React.Component {
                         Или просто нажмите [space]
                     </Typography>*/}
                 </Box>
-                </Box>
-                
-                
-                
-              <Drawer
-                sx={{
-                  width: drawerWidth,
-                  flexShrink: 0,
-                  '& .MuiDrawer-paper': {
-                    width: drawerWidth,
-                    boxSizing: 'border-box',
-                  },
-                }}
-                variant="permanent"
-                anchor="right"
-              >
-                <Toolbar sx={{width: '100%'}}>
-                </Toolbar>
-                <InputText onTextInput={this.handleTextChanged.bind(this)} />
-              </Drawer>
-            </Box>
+            </Container>
           );
     }
 }

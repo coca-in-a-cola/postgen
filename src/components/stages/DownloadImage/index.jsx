@@ -7,15 +7,14 @@ import {
     Divider, ListItem, ListItemText,
     ToggleButton, TextField,
     styled,
-    Toolbar
+    Toolbar,
+    Container
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import CloseIcon from '@mui/icons-material/Close';
-import ImagePreview from '../InputData/ImagePreview';
+import ImagePreviewPrimary from '../../imagePreviews/Primary';
 
 import {stages, imageLoadStatus} from '../../../scripts/enums'
-
-const drawerWidth = '36rem';
 
 
 export default class DownloadImage extends React.Component {
@@ -33,23 +32,15 @@ export default class DownloadImage extends React.Component {
 
     render() {
         return (
-            <Box sx={{ display: 'flex' }}>
+            <Container sx={{paddingBottom: 2}}>
                 <CssBaseline />
                 <Box sx={{width: '100%', position:'relative'}}>
-
-                <Box sx = {{marginTop: 6, paddingBottom: 4, marginLeft: 3, position: 'relative'}}>
-                <Typography color={'textSecondary'} variant={'h1'} sx = {{
-                    opacity: .5, fontSize: 150, fontWeight: 900, position: 'absolute', zIndex: -1, left: -10, top: -50
-                    }}>
-                    03
-                </Typography>
-                <Typography variant={'h2'} sx={{marginLeft: 24}} color={'primary'}>
+                <Typography variant={'h2'} sx={{marginTop: 2, marginBottom: 2}} color={'primary'}>
                     Скачайте картинку
                 </Typography>
-                </Box>
 
-                <ImagePreview src={this.props.url} />
-                <Toolbar sx={{justifyContent: 'flex-start'}}>
+                <ImagePreviewPrimary src={this.props.url} height={600} />
+                <Box sx={{ marginTop: 2, display: 'flex', justifyContent: 'flex-start' }}>
                     <Button
                     variant="contained"
                     component={'a'}
@@ -57,12 +48,13 @@ export default class DownloadImage extends React.Component {
                     margin="dense"
                     size="large"
                     sx={{textAlign: 'center'}}
-
                     href={this.props.url}
-                    download="postgen.jpg"
+                    download="postgen.png"
+                    crossOrigin = "anonymous"
+                    target = "_blank"
                     startIcon={<DownloadIcon />}
                     >
-                    Скачать (jpg)
+                    Скачать (PNG)
                     </Button>
 
                     <Button
@@ -82,9 +74,9 @@ export default class DownloadImage extends React.Component {
                     >
                     Вернуться к списку
                     </Button>
-                </Toolbar>
                 </Box>
-            </Box>
+                </Box>
+            </Container>
           );
     }
 }

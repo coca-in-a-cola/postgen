@@ -11,30 +11,6 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 
 export default class InputText extends React.Component {
-    revesvedFields = [
-        {
-            name: 'header',
-            label: 'Заголовок',
-            multiline: false,
-            rows: 1,
-            maxRows: 1,
-        },
-        {
-            name: 'subheader',
-            label: 'Подзаголовок',
-            multiline: false,
-            rows: 1,
-            maxRows: 1,
-        },
-        {
-            name: 'text',
-            label: 'Основной текст',
-            multiline: true,
-            rows: 2,
-            maxRows: 4,
-        },
-    ];
-
     propTypes = {
         onTextInput: PropTypes.func,
     }
@@ -46,7 +22,6 @@ export default class InputText extends React.Component {
     constructor(props) {
         super(props);
         this.textContent = {}
-        this.state = {textFields: [... this.revesvedFields]}
     }
 
     handleTextChange(event) {
@@ -58,58 +33,27 @@ export default class InputText extends React.Component {
         this.props.onTextInput(this.textContent)
     }
 
-    addTextField() {
-        const n = this.state.textFields.length;
-        this.state.textFields.push(
-            {
-                name: 'additionalText' + n,
-                label: 'Дополнительный текст #' + n,
-                multiline: true,
-                rows: 2,
-                maxRows: 4,
-            },
-        );
-        this.setState(this.state)
-    }
-
     render() {
         return (
-        <Toolbar variant="dense" sx={{width: '100%'}}>
-            <form>
-            <Typography variant={'h6'} color="primary"
-            >
-            Текстовые поля
-            </Typography>
+        <Box sx={{width: '100%'}}>
+                <Typography variant={'h6'} color="secondary"
+                >
+                Подпись
+                </Typography>
 
-            {
-                this.state.textFields.map((field, index) => {
-                    return (
-                        <TextField
-                        name={field.name}
-                        multiline={field.multiline}
-                        rows={field.rows}
-                        maxRows={field.maxRows}
-                        //value={value}
-                        onChange={this.handleTextChange.bind(this)}
-                        sx={{width: '100%'}}
-                        id={'TextField'+ index}
-                        label={field.label}
-                        variant="outlined"
-                        color="secondary"
-                        margin="dense"/>
-                    );
-                })
-            }
-
-            <Container sx={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-            <Fab color="secondary" aria-label="add" onClick={(e) => {
-                this.addTextField.call(this)
-            }}>
-            <AddIcon/>
-            </Fab>
-            </Container>
-            </form>
-        </Toolbar>
+                <TextField
+                name={"text"}
+                multiline
+                rows={2}
+                maxRows={4}
+                onChange={this.handleTextChange.bind(this)}
+                sx={{width: '100%'}}
+                id={'TextField'}
+                label={"Введите текст"}
+                variant="outlined"
+                color="primary"
+                margin="dense"/>
+        </Box>
         )
     }
 }

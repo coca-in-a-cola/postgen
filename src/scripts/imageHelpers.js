@@ -34,8 +34,7 @@ export async function urlToBase64(url) {
     
     const dataURL = await new Promise((resolve, reject)=> {
         const image = new Image();
-        image.src = url
-    
+            
         image.onload = (() => {
             var canvas = document.createElement("canvas");
             canvas.width = image.width;
@@ -44,6 +43,9 @@ export async function urlToBase64(url) {
             ctx.drawImage(image, 0, 0);
             resolve(canvas.toDataURL("image/jpg"));
         })
+
+        image.setAttribute('crossOrigin', 'anonymous');
+        image.src = url
     })
 
   

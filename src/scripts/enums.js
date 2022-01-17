@@ -4,9 +4,12 @@ export const stages = {
     DOWNLOAD_IMAGE: 3
 }
 
-export const imageLoadStatus = {
+export const statusCodes = {
     SUCCESS: "SUCCESS",
     ERROR: "ERROR",
     EMPTY: "EMPTY",
-    TIMEOUT: "TIMEOUT"
+    TIMEOUT: "TIMEOUT" 
 }
+
+// лень переименовывать
+export const imageLoadStatus = statusCodes;
