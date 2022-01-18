@@ -31,6 +31,7 @@ export default class DownloadImage extends React.Component {
     }
 
     render() {
+        console.log(this.state);
         return (
             <Container sx={{paddingBottom: 2}}>
                 <CssBaseline />

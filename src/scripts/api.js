@@ -113,8 +113,9 @@ export default class Api {
         };
 
         const url = `${apiServer}/api/prolong-token?token=${this._token}`;
-        // const response = await fetch(url);
-        return new Promise( (resolve, reject) => setTimeout(resolve("12345"), 2000));
+        
+        return fetch(url);
+        ///return new Promise( (resolve, reject) => setTimeout(resolve("12345"), 2000));
     }
 
     /**

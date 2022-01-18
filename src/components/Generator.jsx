@@ -12,7 +12,7 @@ export default class Generator extends React.Component {
 
     handleStateSwitch = (event, data) => {
         console.log(data);
-        this.setState(data)
+        this.setState(data, () => console.log(this.state))
     }
 
     async initialize (event, data) {
@@ -24,9 +24,8 @@ export default class Generator extends React.Component {
     }
 
     async shutdown (event, data) {
-        // Жду, когда Петя пофиксит это на беке
         await this.state.api.shutdown();
-        await this.setState({api: undefined, listModel: undefined})
+        await this.setState({api: undefined, listModel: undefined, pages: undefined})
         
         return(statusCodes.SUCCESS)
     }
